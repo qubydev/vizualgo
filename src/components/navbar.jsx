@@ -6,7 +6,7 @@ export default function Navbar() {
     <div className="w-full px-6 shadow-md">
       <nav className='h-16 flex items-center justify-between'>
         <Link href="/">
-          ~/algosual
+          ~/vizualgo
         </Link>
       </nav>
     </div>
