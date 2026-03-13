@@ -5,27 +5,19 @@ import { Button } from '../ui/button';
 import { SkipForward, SkipBack, Pause, Play } from 'lucide-react';
 
 const initialData = [
-    { id: '1', value: -4, state: 'idle' },
-    { id: '2', value: 10, state: 'idle' },
+    { id: '1', value: -3, state: 'idle' },
+    { id: '2', value: 7, state: 'idle' },
     { id: '3', value: 0, state: 'idle' },
     { id: '4', value: -10, state: 'idle' },
-    { id: '5', value: 7, state: 'idle' },
-    { id: '6', value: -2, state: 'idle' },
-    { id: '7', value: 5, state: 'idle' },
-    { id: '8', value: 1, state: 'idle' },
-    { id: '9', value: -7, state: 'idle' },
-    { id: '10', value: 3, state: 'idle' },
-    { id: '11', value: 9, state: 'idle' },
-    { id: '12', value: -6, state: 'idle' },
-    { id: '13', value: 6, state: 'idle' },
-    { id: '14', value: -1, state: 'idle' },
-    { id: '15', value: 4, state: 'idle' },
-    { id: '16', value: 2, state: 'idle' },
-    { id: '17', value: -3, state: 'idle' },
-    { id: '18', value: 8, state: 'idle' },
-    { id: '19', value: -9, state: 'idle' },
-    { id: '20', value: -8, state: 'idle' },
-    { id: '21', value: -5, state: 'idle' },
+    { id: '5', value: 5, state: 'idle' },
+    { id: '6', value: 2, state: 'idle' },
+    { id: '7', value: -7, state: 'idle' },
+    { id: '8', value: 10, state: 'idle' },
+    { id: '9', value: -1, state: 'idle' },
+    { id: '10', value: 6, state: 'idle' },
+    { id: '11', value: 3, state: 'idle' },
+    { id: '12', value: -5, state: 'idle' },
+    { id: '13', value: 9, state: 'idle' },
 ];
 
 export default function BubbleSortDemo() {
