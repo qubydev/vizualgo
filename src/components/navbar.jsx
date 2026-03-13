@@ -1,11 +1,14 @@
 import React from 'react'
+import Link from 'next/link'
 
 export default function Navbar() {
   return (
-    <div className="w-full max-w-3xl mx-auto px-6">
-        <nav className='h-16 flex items-center justify-between'>
-            ~/qubyalgo
-        </nav>
+    <div className="w-full px-6 shadow-md">
+      <nav className='h-16 flex items-center justify-between'>
+        <Link href="/">
+          ~/algosual
+        </Link>
+      </nav>
     </div>
   )
 }
