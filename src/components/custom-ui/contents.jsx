@@ -14,7 +14,7 @@ export const AlgoLink = ({ name, link }) => {
     <Link
       href={link}
       rel="noopener noreferrer"
-      className="flex items-center justify-between px-4 py-2 rounded-md hover:text-blue-500 transition-colors group"
+      className="flex items-center justify-between px-4 py-2 rounded-md hover:text-primary transition-colors group"
     >
       <span>{name}</span>
       <ArrowRight className="size-4 group-hover:translate-x-1 relative transition-transform duration-300" />

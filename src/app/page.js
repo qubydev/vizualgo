@@ -1,4 +1,4 @@
-import { CategorySection, AlgoLink } from "@/components/custom-ui/main";
+import { CategorySection, AlgoLink } from "@/components/custom-ui/contents";
 
 const ALGO_MAP = [
   {

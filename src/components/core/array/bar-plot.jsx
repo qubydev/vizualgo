@@ -3,7 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const stateColors = {
-    idle: 'bg-blue-400',
+    idle: 'bg-primary/70',
     active: 'bg-amber-400',
     success: 'bg-green-500',
     error: 'bg-destructive'
@@ -38,7 +38,7 @@ export function BarPlot({ data }) {
             <div className="relative flex items-end gap-[2px] h-64 w-full">
 
                 <div
-                    className="absolute left-0 right-0 h-0.5 bg-primary z-0 translate-y-1/2"
+                    className="absolute left-0 right-0 h-0.5 bg-foreground z-0 translate-y-1/2"
                     style={{ bottom: `${zeroLinePct}%` }}
                 />
 
