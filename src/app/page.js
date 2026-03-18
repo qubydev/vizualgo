@@ -4,7 +4,8 @@ const ALGO_MAP = [
   {
     name: "Array",
     pages: [
-      { name: "Bubble Sort", link: "/bubble-sort" }
+      { name: "Bubble Sort", link: "/bubble-sort" },
+      { name: "Selection Sort", link: "/selection-sort" },
     ]
   }
 ];

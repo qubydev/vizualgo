@@ -1,7 +1,6 @@
 import React from 'react'
 import { Heading } from '@/components/custom-ui/heading'
 import BubbleSortDemo from '@/components/algorithms/bubble-sort-demo';
-import SelectionSortDemo from '@/components/algorithms/selection-sort-demo';
 import { Mark } from '@/components/custom-ui/mark';
 
 export default function Page() {
@@ -15,8 +14,6 @@ export default function Page() {
             </p>
 
             <BubbleSortDemo />
-
-            <Heading level={2} className="mt-4">Working</Heading>
         </div>
     )
 }

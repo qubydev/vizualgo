@@ -1,8 +1,7 @@
 "use client";
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { BarPlot } from '../core/array/bar-plot';
-import { Button } from '../ui/button';
-import { SkipForward, SkipBack, Pause, Play } from 'lucide-react';
+import Controllers from '../custom-ui/controllers';
 
 const initialData = [
     { id: '1', value: -3, state: 'idle' },
@@ -20,23 +19,89 @@ const initialData = [
     { id: '13', value: 9, state: 'idle' },
 ];
 
-/**
- * Selection Sort — per step:
- *   - Scan through the unsorted region (i..n-1), tracking minIdx
- *   - Highlight i (pivot), minIdx (current best), and j (current scan target) as 'active'
- *   - When j reaches end of unsorted region: swap data[i] ↔ data[minIdx], mark i as 'success', advance i
- *
- * History stack stores { data, i, j, minIdx } snapshots for step-back support.
- */
+const INITIAL_MESSAGE = 'Click start to see the selection sort in action!';
+
 export default function SelectionSortDemo() {
     const [sampleData, setSampleData] = useState(initialData);
     const [isSorting, setIsSorting] = useState(false);
+    const [message, setMessage] = useState(INITIAL_MESSAGE);
+    const [speed, setSpeed] = useState(1);
+    const [pointers, setPointers] = useState([]);
 
-    const iRef = useRef(0); // start of unsorted region
-    const jRef = useRef(1); // current scan position
-    const minIdxRef = useRef(0); // index of current minimum in unsorted region
+    const iRef = useRef(0);
+    const jRef = useRef(1);
+    const minIdxRef = useRef(0);
     const intervalRef = useRef(null);
     const historyRef = useRef([]);
+    const stepForwardRef = useRef(null);
+    const messageRef = useRef(INITIAL_MESSAGE);
+
+    const setMsg = useCallback((msg) => {
+        messageRef.current = msg;
+        setMessage(msg);
+    }, []);
+
+    const buildPointers = (i, j, minIdx, length) => {
+        const pts = [];
+        if (i < length) pts.push({ index: i, label: 'i', color: '#a78bfa' });
+        if (j < length) pts.push({ index: j, label: 'j', color: '#fb923c' });
+        if (minIdx < length) pts.push({ index: minIdx, label: 'min', color: '#f43f5e' });
+        return pts;
+    };
+
+    const stepForward = useCallback(() => {
+        const i = iRef.current;
+        const j = jRef.current;
+        const minIdx = minIdxRef.current;
+
+        if (i >= initialData.length - 1) {
+            clearInterval(intervalRef.current);
+            setIsSorting(false);
+            setSampleData(prev => prev.map(d => ({ ...d, state: 'success' })));
+            setMsg('Sorting complete!');
+            setPointers([]);
+            return;
+        }
+
+        if (j < initialData.length) {
+            setSampleData(prevData => {
+                historyRef.current.push({ data: prevData.map(d => ({ ...d })), i, j, minIdx, message: messageRef.current, pointers: buildPointers(i, j, minIdx, initialData.length) });
+                const newMin = prevData[j].value < prevData[minIdx].value ? j : minIdx;
+                const msg = newMin !== minIdx
+                    ? `New minimum found: ${prevData[j].value} at index ${j}`
+                    : `${prevData[j].value} >= current min ${prevData[minIdx].value}, no change`;
+                minIdxRef.current = newMin;
+                jRef.current = j + 1;
+                setMsg(msg);
+                setPointers(buildPointers(i, j + 1, newMin, initialData.length));
+                return prevData.map((d, idx) => ({
+                    ...d,
+                    state: d.state === 'success' ? 'success' : idx === j || idx === newMin ? 'active' : 'idle'
+                }));
+            });
+        } else {
+            setSampleData(prevData => {
+                historyRef.current.push({ data: prevData.map(d => ({ ...d })), i, j, minIdx, message: messageRef.current, pointers: buildPointers(i, j, minIdx, initialData.length) });
+                const data = prevData.map(d => ({ ...d, state: d.state === 'success' ? 'success' : 'idle' }));
+                if (minIdx !== i) [data[i], data[minIdx]] = [data[minIdx], data[i]];
+                data[i].state = 'success';
+                const msg = minIdx !== i
+                    ? `Swapped index ${i} and ${minIdx}, position ${i} is sorted`
+                    : `No swap needed, index ${i} is already the minimum`;
+                const nextI = i + 1;
+                iRef.current = nextI;
+                jRef.current = nextI + 1;
+                minIdxRef.current = nextI;
+                setMsg(msg);
+                setPointers(buildPointers(nextI, nextI + 1, nextI, initialData.length));
+                return data;
+            });
+        }
+    }, [setMsg]);
+
+    useEffect(() => {
+        stepForwardRef.current = stepForward;
+    }, [stepForward]);
 
     const reset = useCallback(() => {
         clearInterval(intervalRef.current);
@@ -46,102 +111,58 @@ export default function SelectionSortDemo() {
         historyRef.current = [];
         setSampleData(initialData.map(item => ({ ...item, state: 'idle' })));
         setIsSorting(false);
-    }, []);
-
-    const stepForward = useCallback(() => {
-        const n = initialData.length;
-        const i = iRef.current;
-        const j = jRef.current;
-        const minIdx = minIdxRef.current;
-
-        // All passes complete — mark everything success and stop
-        if (i >= n - 1) {
-            clearInterval(intervalRef.current);
-            setIsSorting(false);
-            setSampleData(prev => prev.map(d => ({ ...d, state: 'success' })));
-            return;
-        }
-
-        setSampleData(prevData => {
-            // Snapshot for step-back
-            historyRef.current.push({
-                data: prevData.map(d => ({ ...d })),
-                i, j, minIdx,
-            });
-
-            // Highlight: i (pivot), minIdx (best so far), j (being compared)
-            const data = prevData.map((d, idx) => {
-                if (d.state === 'success') return d;
-                if (idx === i || idx === minIdx || idx === j) return { ...d, state: 'active' };
-                return { ...d, state: 'idle' };
-            });
-
-            // Update minimum if current scan target is smaller
-            const newMinIdx = data[j].value < data[minIdx].value ? j : minIdx;
-
-            if (j >= n - 1) {
-                // Scan complete — swap minimum into position i
-                if (newMinIdx !== i) {
-                    const temp = { ...data[i] };
-                    data[i] = { ...data[newMinIdx] };
-                    data[newMinIdx] = temp;
-                }
-                data[i].state = 'success';
-
-                const nextI = i + 1;
-                iRef.current = nextI;
-                jRef.current = nextI + 1;
-                minIdxRef.current = nextI;
-            } else {
-                minIdxRef.current = newMinIdx;
-                jRef.current = j + 1;
-            }
-
-            return data;
-        });
-    }, []);
+        setMsg(INITIAL_MESSAGE);
+        setPointers([]);
+    }, [setMsg]);
 
     const stepBackward = useCallback(() => {
         const history = historyRef.current;
         if (history.length === 0) return;
-
         const prev = history.pop();
         iRef.current = prev.i;
         jRef.current = prev.j;
         minIdxRef.current = prev.minIdx;
         setSampleData(prev.data);
-    }, []);
+        setMsg(prev.message);
+        setPointers(prev.pointers);
+    }, [setMsg]);
 
     const startSorting = useCallback(() => {
         if (isSorting) return;
         setIsSorting(true);
-        intervalRef.current = setInterval(stepForward, 500);
-    }, [isSorting, stepForward]);
+        intervalRef.current = setInterval(() => stepForwardRef.current?.(), 500 / speed);
+    }, [isSorting, speed]);
 
     const pauseSorting = useCallback(() => {
         clearInterval(intervalRef.current);
         setIsSorting(false);
     }, []);
 
+    const handleSpeedToggle = useCallback(() => {
+        const newSpeed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
+        setSpeed(newSpeed);
+        if (isSorting) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = setInterval(() => stepForwardRef.current?.(), 500 / newSpeed);
+        }
+    }, [speed, isSorting]);
+
     return (
         <div>
-            <BarPlot data={sampleData} />
-            <div className="flex items-center gap-2 mt-4">
-                <Button onClick={isSorting ? pauseSorting : startSorting}>
-                    {isSorting
-                        ? <><Pause className="mr-1" /> Pause</>
-                        : <><Play className="mr-1" /> Start</>}
-                </Button>
-                <Button variant="outline" size="icon" onClick={stepBackward}>
-                    <SkipBack />
-                </Button>
-                <Button variant="outline" size="icon" onClick={stepForward}>
-                    <SkipForward />
-                </Button>
-                <Button variant="destructive" onClick={reset}>
-                    Reset
-                </Button>
+            <div className='py-4'>
+                <BarPlot data={sampleData} pointers={pointers} />
             </div>
+            <p className='text-xs'>{"> "}{message}</p>
+            <Controllers
+                isSorting={isSorting}
+                speed={speed}
+                onStart={startSorting}
+                onPause={pauseSorting}
+                onStepForward={stepForward}
+                onStepBackward={stepBackward}
+                onReset={reset}
+                onSpeedToggle={handleSpeedToggle}
+            />
         </div>
     );
 }
